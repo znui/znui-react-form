@@ -1,0 +1,145 @@
+@import "../../../zr.variables.less";
+
+.zr-status(@color: @zr-color-default){
+    border-bottom-color: @color;
+    background-color: @color;
+    opacity: 0.8;
+}
+
+.zr-form-item{
+    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    display: flex;
+    margin: 1px 0px;
+
+    &.row{
+        flex-direction: row;
+    }
+    &.column{
+        flex-direction: column;
+        .title{
+            text-align: left !important;
+        }
+    }
+
+    &>*:last-child{
+        flex: 1;
+        font-size: 14px;
+        border-radius: 3px;
+        background-color: rgba(241, 241, 241, 0.4);
+    }
+
+    /*
+    &.default{
+        .zr-status(@zr-color-default);
+    }*/
+
+    &.primary{
+        .zr-status(@zr-color-primary);
+    }
+
+    &.success{
+        //.zr-status(#ececec);
+        .zr-status(#d6f9d7);
+    }
+
+    &.info{
+        .zr-status(@zr-color-info);
+    }
+
+    &.warning{
+        .zr-status(@zr-color-warning);
+        color: #FFF;
+    }
+
+    &.danger{
+        .zr-status(@zr-color-danger);
+        color: #FFF;
+    }
+
+    &>.zrfi-header{
+        display: flex;
+        align-items: center;
+        &>.title{
+            position: relative;
+            text-align: right;
+            min-width: 100px;
+            line-height: 24px;
+            padding-right: 10px;
+        }
+        &>.icon{
+            text-align: center;
+            min-width: 2rem;
+            margin: auto;
+        }
+    }
+
+    &>.zrfi-body{
+        position: relative;
+        &>div{
+            width: 100%;
+        }
+        & > .suffix{
+            position: absolute;
+            right: 0px;
+            min-width: 32px;
+            line-height: 30px;
+            text-align: center;
+            background-color: transparent;
+        }
+    }
+
+
+    input, textarea, select, &.input{
+        background-color: transparent;
+        width: 100%;
+        line-height: 24px;
+        border: none;
+        &:focus, &:active{
+            color: #111;
+        }
+        &.align-left{
+            text-align: left;
+            .input{
+
+            }
+        }
+        &.align-right{
+            text-align: right;
+        }
+
+        &:focus{
+            background-color: #f0f0ee;
+            color: #0a0a0a;
+        }
+
+    }
+
+
+    &[data-required=true]{
+        /*
+        &::after{
+            position: absolute;
+            top: -1.4rem;
+            left: -0px;
+            content: "\f069";
+            font-family: FontAwesome;
+            font-size: 1rem;
+            color: #EA2626;
+        }*/
+    }
+
+    &.required {
+        .title::after{
+            position: absolute;
+            top: 2px;
+            right: 1px;
+            content: "*";
+            font-size: 22px !important;
+            color: rgba(208, 42, 37, 0.5);
+        }
+    }
+
+    textarea{
+        min-height: 12rem;
+    }
+}

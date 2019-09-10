@@ -1,0 +1,66 @@
+@import "../../../zr.variables.less";
+
+
+.zr-checkbox-group{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.zr-status(@color: @zr-color-default){
+    &>.mark{
+        color: @color !important;
+        border-color: @color !important;
+    }
+}
+
+.zr-checkbox {
+    display: flex;
+    justify-content: left;
+    /*align-items: center;*/
+    color: #434242;
+    cursor: pointer;
+    &>input{
+        display: none;
+    }
+    .mark{
+        display: flex;
+        justify-content: center;
+        align-items: center;;
+        border-radius: 3px;
+        border: 1px solid transparent;
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        margin: 3px;
+        box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 6px, rgba(0, 0, 0, 0.12) 0px 1px 4px;
+        .icon{
+            opacity: 0;
+            font-size: 12px;
+            -webkit-transition: all .3s;
+            -moz-transition: all .3s;
+            -o-transition: all .3s;
+        }
+
+    }
+
+    &[disabled="false"]{
+        .mark:hover{
+            box-shadow:0 0 10px #2db7f5;
+        }
+    }
+
+    .zr-status(@zr-color-default);
+
+    &[data-checked="true"]{
+        .icon{
+            opacity: 1;
+        }
+        .zr-status(@zr-checked-color);
+    }
+
+    &[data-disabled="true"]{
+        .zr-status(@zr-disabled-color);
+    }
+
+}

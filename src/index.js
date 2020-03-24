@@ -1,28 +1,9 @@
-module.exports = zn.arrayValueToObject([
-    'AjaxUploader',
-    'AutoComplete',
-    'Checkbox',
-    'CheckboxGroup',
-    'DropdownSelector',
-    'DateTime',
-    'FileUploader',
-    'FormTitle',
-    'ImageUploader',
-    'Radio',
-    'RichEditor',
-    'RichSelector',
-    'Select',
-    'ImageUploader',
-    'Menu',
-    'MultiInput',
-    'OrderCode',
-    'Form',
-    'FormItem',
-    'FileUploader',
-    'Input',
-    'Label',
-    'Textarea',
-    'ToggleSwitch'
-], function (value, index){
-    return require('./'+value+'.js');
-});
+module.exports = {
+    AjaxForm: require('./AjaxForm'),
+    Form: require('./Form'),
+    FormButtons: require('./FormButtons'),
+    FormGroup: require('./FormGroup'),
+    FormItem: require('./FormItem'),
+    FormTitle: require('./FormTitle'),
+    NativeForm: require('./NativeForm')
+};

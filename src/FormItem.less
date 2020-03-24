@@ -1,15 +1,18 @@
-@import "../../../zr.variables.less";
+@import "./zr.variables.less";
 
 .zr-status(@color: @zr-color-default){
-    border-bottom-color: @color;
-    background-color: @color;
-    opacity: 0.8;
+    &>.zrfi-body{
+        border-color: @color;
+        color: @color;
+        opacity: 0.8;
+    }
 }
 
 .zr-form-item{
     border-bottom: 1px solid rgba(0, 0, 0, 0.03);
     display: flex;
-    margin: 1px 0px;
+    margin: 2px 0px;
+    padding: 2px 0px;
 
     &.row{
         flex-direction: row;
@@ -21,39 +24,42 @@
         }
     }
 
-    &>*:last-child{
-        flex: 1;
-        font-size: 14px;
-        border-radius: 3px;
-        background-color: rgba(241, 241, 241, 0.4);
-    }
+    
 
     /*
     &.default{
         .zr-status(@zr-color-default);
     }*/
 
-    &.primary{
+    &[data-status="primary"]{
         .zr-status(@zr-color-primary);
     }
 
-    &.success{
-        //.zr-status(#ececec);
-        .zr-status(#d6f9d7);
+    &[data-status="success"]{
+        .zr-status(@zr-color-success);
     }
 
-    &.info{
+    &[data-status="info"]{
         .zr-status(@zr-color-info);
     }
 
-    &.warning{
+    &[data-status="warning"]{
         .zr-status(@zr-color-warning);
-        color: #FFF;
     }
 
-    &.danger{
+    &[data-status="error"]{
         .zr-status(@zr-color-danger);
-        color: #FFF;
+        &>.zrfi-body{
+            box-shadow: 0 0 10px #dcd2d2;
+            -webkit-animation-name: shineRed;
+            -webkit-animation-duration: 1.5s;
+            -webkit-animation-iteration-count: infinite;
+            @-webkit-keyframes  shineRed {
+                from { -webkit-box-shadow: 0 0 5px #bbb; }
+                50% { -webkit-box-shadow: 0 0 10px @zr-color-danger; }
+                to { -webkit-box-shadow: 0 0 5px #bbb; }
+            }
+        }
     }
 
     &>.zrfi-header{
@@ -75,6 +81,12 @@
 
     &>.zrfi-body{
         position: relative;
+        flex: 1;
+        font-size: 14px;
+        min-height: 24px;
+        border-radius: 3px;
+        border: 1px solid #f1eded;
+        background-color: hsla(0,0%,94.5%,.4);
         &>div{
             width: 100%;
         }
@@ -86,6 +98,14 @@
             text-align: center;
             background-color: transparent;
         }
+        
+    }
+
+    .error-message{
+        width: 20px;
+        line-height: 24px;
+        text-align: center;
+        cursor: pointer;
     }
 
 
@@ -108,34 +128,21 @@
         }
 
         &:focus{
-            background-color: #f0f0ee;
-            color: #0a0a0a;
+            background-color: #fafaf9;
+            color: #222222;
         }
 
     }
 
 
     &[data-required=true]{
-        /*
-        &::after{
-            position: absolute;
-            top: -1.4rem;
-            left: -0px;
-            content: "\f069";
-            font-family: FontAwesome;
-            font-size: 1rem;
-            color: #EA2626;
-        }*/
-    }
-
-    &.required {
         .title::after{
             position: absolute;
             top: 2px;
             right: 1px;
             content: "*";
-            font-size: 22px !important;
-            color: rgba(208, 42, 37, 0.5);
+            font-size: 24px !important;
+            color: rgba(206, 17, 10, 0.5);
         }
     }
 

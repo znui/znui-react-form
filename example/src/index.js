@@ -1,26 +1,8 @@
-# znui-react-form
-Form Component.
-
-[![npm](https://img.shields.io/npm/v/znui-react-form.svg)](https://www.npmjs.com/package/znui-react-form)
-[![npm](https://img.shields.io/npm/dm/znui-react-form.svg)](https://www.npmjs.com/package/znui-react-form)
-
-## Demo
-
-[Take a look at the demo](https://znui.github.io/znui-react-form/example/www/index.html)
-
-## Installation
-
-```bash
-npm install znui-react-form -s
-```
-
-## Usage
-
-```javascript
-
-var ReactDOM = require('react-dom');
-var form = require('znui-react-form');
-
+require('znui-react');
+require('../../src/index.less');
+require('./index.less');
+var React = znui.React || require('react');
+var form = require('../../src/index');
 var inputs = require('znui-react-input');
 var selector = require('znui-react-selector');
 
@@ -35,8 +17,3 @@ znui.react.createApplication({
         ]} />
     </div>
 });
-```
-
-## License
-
-MIT

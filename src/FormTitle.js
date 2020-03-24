@@ -1,7 +1,7 @@
-require('./FormTitle.less');
-var React = require('react');
+var React = znui.React || require('react');
+
 module.exports = React.createClass({
-	displayName:'FormTitle',
+	displayName:'ZRFormTitle',
 	getValue: function () {
 		return null;
 	},
@@ -10,7 +10,7 @@ module.exports = React.createClass({
 	},
 	render: function(){
 		return (
-			<div className={zn.react.classname('zr-form-title', this.props.className)} style={this.props.style} >
+			<div className={znui.react.classname('zr-form-title', this.props.className)} style={this.props.style} >
 				<span className="zf-title">{this.props.title}</span>
 			</div>
 		);

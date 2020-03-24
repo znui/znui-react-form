@@ -1,97 +1,104 @@
-require('./FormItem.less');
-require('./FormItem.Wap.Inline.less');
-require('./FormItem.Web.Inline.less');
-var React = require('react');
-var RTFlexItem = require('../basic/RTFlexItem');
+var React = znui.React || require('react');
+var icon = require('znui-react-icon');
 
-module.exports = React.createClass({
+var FormItem = React.createClass({
 	displayName:'FormItem',
 	getDefaultProps: function (){
 		return {
 			disabled: false,
-			className: ''
+			required: true
 		}
 	},
 	getInitialState: function(){
 		return {
+			status: 'default',
 			value: this.props.value,
-			status: 'default'
+			errorMessage: null
 		}
 	},
-	componentDidMount: function (){
-		if(this.props.value!=undefined && this.refs.input){
-			if(this.refs.input.setValue){
-				this.refs.input.setValue(this.props.value);
-			}else {
-				zn.notification.error('The FormItem input component ' + this.props.title + ' has not setValue method.');
-			}
-		}
+	setValue: function (value, text){
+		this.setState({
+			value: value,
+			text: text
+		});
+	},
+	getValue: function (callback){
+		return this.state.value;
 	},
 	validate: function (callback){
-		if(!this.refs.input){
-			return zn.notification.error('Form item input component ' + this.props.title + ' is undefined.'), false;
-		}
-		var _value = this.refs.input.getValue();
-		if(this.props.required && (_value === '' || _value === null || _value === undefined)){
+		var _value = this.state.value;
+		if(this.props.required && (_value === '' || _value == null)){
 			this.setState({
-				status: 'danger'
+				status: 'error',
+				errorMessage: this.props.error || "The field is required."
 			});
-			var _msg = this.props.error || ((this.props.title||'字段')+'是必填项.');
-			if(zn.react.isMobile()){
-				zn.notification.error(_msg);
-			}else {
-				zn.notification.error(_msg)
-			}
-			return false;
+			return;
 		}
 
 		var _callback = callback && callback(_value, this);
-		if(_callback == false){
-			return this.setState({
-				status: 'danger'
-			}), false;
-		}
-
-		return this.setState({
-			status: 'success'
-		}), _value;
-	},
-	__onInputChange: function (value, input){
-		if(value==null){
+		if(_callback === false){
+			this.setState({
+				status: 'error',
+				errorMessage: this.props.error
+			});
 			return;
 		}
-		this.props.onChange && this.props.onChange(value, input, this);
+		this.setState({
+			status: 'success',
+			errorMessage: null
+		});
+		window.setTimeout(()=>this.setState({status: 'default'}), 2000);
+
+		return _value;
+	},
+	__onInputChange: function (event, input){
+		event.formitem = this;
+		this.state.value = event.value;
+		var _return = this.props.onChange && this.props.onChange(event, input, this);
+		if(_return === false){
+			return false;
+		}
+		this.props.onInputChange && this.props.onInputChange(event, input, this);
+	},
+	__renderHeader: function (){
+		return (
+			<div className="zrfi-header">
+				{this.props.icon && <icon.SVGIcon icon={this.props.icon} />}
+				{this.props.label && <div className="title">{this.props.label}</div>}
+			</div>
+		);
+	},
+	__renderBody: function (){
+		var _inputProps = zn.extend({}, this.props, {
+			className: znui.react.classname('body-input', this.props.inputClassName),
+			value: this.state.value,
+			text: this.state.text,
+			onChange: this.__onInputChange
+		});
+		var _inputElement = znui.react.createReactElement(this.props.input, _inputProps);
+		return (
+			<div className="zrfi-body" data-zr-popup-tooltip={this.state.errorMessage}>
+				{ _inputElement }
+				{this.props.suffix && <span className="suffix">{this.props.suffix}</span>}
+			</div>
+		);
 	},
 	render: function(){
-		var _input = null,
-			_type = this.props.type;
-		if(zn.is(_type, 'string')){
-			if(zn.path(window, _type)){
-				_input = zn.path(window, _type);
-			}else {
-				_input = zn.react[_type];
-			}
-		}else {
-			_input = _type;
-		}
-
-		if(_type=='FormTitle'){
-			return _input && <_input {...this.props} ref="input" className={this.props.inputClassName||''} onChange={this.__onInputChange} />;
-		}
-
 		return (
-			<RTFlexItem
-				{...this.props}
-				className={zn.react.classname('zr-form-item', this.props.className, this.state.status, this.props.required?'required':'')} >
-				<div className="zrfi-header">
-					{this.props.icon && <div className="icon"><i className={"fa " + this.props.icon} /></div>}
-					{this.props.title && <div className="title">{this.props.title}</div>}
-				</div>
-				<div className="zrfi-body">
-					{!!_input && <_input {...this.props} ref="input" className={this.props.inputClassName||''} onChange={this.__onInputChange} />}
-					{this.props.suffix && <span className="suffix">{this.props.suffix}</span>}
-				</div>
-			</RTFlexItem>
+			<div style={this.props.style} className={znui.react.classname('zr-form-item', this.props.className)} 
+				data-disabled={this.props.disabled}
+				data-required={this.props.required}
+				data-layout={this.props.layout}
+				data-size={this.props.size}
+				data-status={this.state.status} >
+				{this.__renderHeader()}
+				{this.__renderBody()}
+			</div>
 		);
 	}
 });
+
+
+
+
+module.exports = FormItem;

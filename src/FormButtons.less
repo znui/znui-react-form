@@ -1,18 +1,8 @@
 .zr-form-buttons{
     text-align: center;
+    margin: 5px 0px;
     .zr-button{
-        width: 120px;
-        &[type="submit"] {
-            box-shadow: 0 0 10px #dcd2d2;
-            -webkit-animation-name: shineRed;
-            -webkit-animation-duration: 1.5s;
-            -webkit-animation-iteration-count: infinite;
-            @-webkit-keyframes  shineRed {
-                from { -webkit-box-shadow: 0 0 5px #bbb; }
-                50% { -webkit-box-shadow: 0 0 10px #3498db; }
-                to { -webkit-box-shadow: 0 0 5px #bbb; }
-            }
-        }
+        min-width: 120px;
 
         &[type="cancel"] {
             background-color: #F44336;

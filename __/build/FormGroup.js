@@ -4,32 +4,27 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 var React = znui.React || require('react');
 
-var Button = require('./Button');
+var FormItem = require('./FormItem');
 
 var loader = require('znui-react-loader');
 
 module.exports = React.createClass({
-  displayName: 'ZRButtons',
+  displayName: 'ZRFormGroup',
   getInitialState: function getInitialState() {
     return {
       loading: true
     };
   },
-  __itemClick: function __itemClick(event, item, index) {
-    event.data = item;
-    event.index = index;
-    event.sender = this;
-    this.props.onClick && this.props.onClick(event, this);
-  },
   __itemRender: function __itemRender(item, index) {
-    var _this = this;
+    var _return = this.props.itemRender && this.props.itemRender(item, index);
 
-    return /*#__PURE__*/React.createElement(Button, _extends({}, item, {
-      key: index,
-      onClick: function onClick(event) {
-        return _this.__itemClick(event, item, index);
-      }
-    }));
+    if (_return === null) {
+      _return = /*#__PURE__*/React.createElement(FormItem, _extends({}, item, {
+        key: index
+      }));
+    }
+
+    return _return;
   },
   __onLoading: function __onLoading() {
     this.setState({
@@ -43,14 +38,13 @@ module.exports = React.createClass({
   },
   render: function render() {
     return /*#__PURE__*/React.createElement("div", {
-      className: znui.react.classname("zr-buttons", this.props.className),
-      style: this.props.style
-    }, /*#__PURE__*/React.createElement(znui.react.DataView, {
-      data: this.props.data,
+      className: znui.react.classname("zr-form-group", this.props.className),
+      style: znui.react.style(this.props.style)
+    }, /*#__PURE__*/React.createElement(znui.react.DataView, _extends({}, this.props, {
       itemRender: this.__itemRender,
       onLoading: this.__onLoading,
       onFinished: this.__onFinished
-    }), this.state.loading && /*#__PURE__*/React.createElement(loader.Loader, {
+    })), this.state.loading && /*#__PURE__*/React.createElement(loader.Loader, {
       content: "...",
       loader: "circle",
       size: "size-smail",

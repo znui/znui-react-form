@@ -222,7 +222,7 @@ module.exports = React.createClass({
 		if(item.type=='ZRHidden'){
 			return this.state.hiddens[item.name] = item.value!=null ? this.__parseItemValue(item.value): null, null;
 		}
-		return <FormItem {...item} key={index} ref={(ref)=>this.state.refs[item.name] = ref} onInputChange={this.__onItemInputChange}/>;
+		return <FormItem {...item} key={index} ref={(ref)=>this.state.refs[item.name] = ref} onInputChange={this.__onItemInputChange} onInputEnter={this.submit}/>;
 	},
 	__renderItems: function (){
 		return <FormGroup data={this.props.data} itemRender={this.__itemRender} />;

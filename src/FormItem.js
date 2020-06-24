@@ -16,6 +16,11 @@ var FormItem = React.createClass({
 			errorMessage: null
 		}
 	},
+	componentWillUnmount: function (){
+		if(this._timeout){
+			window.clearTimeout(this._timeout);
+		}
+	},
 	setValue: function (value, text){
 		this.setState({
 			value: value,
@@ -47,7 +52,11 @@ var FormItem = React.createClass({
 			status: 'success',
 			errorMessage: null
 		});
-		window.setTimeout(()=>this.setState({status: 'default'}), 2000);
+		this._timeout = window.setTimeout(function (){
+			if(this.__isMounted && this.setState){
+				this.setState({ status: 'default' });
+			}
+		}.bind(this), 1000);
 
 		return _value;
 	},

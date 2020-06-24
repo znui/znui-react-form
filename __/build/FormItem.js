@@ -19,6 +19,11 @@ var FormItem = React.createClass({
       errorMessage: null
     };
   },
+  componentWillUnmount: function componentWillUnmount() {
+    if (this._timeout) {
+      window.clearTimeout(this._timeout);
+    }
+  },
   setValue: function setValue(value, text) {
     this.setState({
       value: value,
@@ -29,8 +34,6 @@ var FormItem = React.createClass({
     return this.state.value;
   },
   validate: function validate(callback) {
-    var _this = this;
-
     var _value = this.state.value;
 
     if (this.props.required && (_value === '' || _value == null)) {
@@ -55,11 +58,13 @@ var FormItem = React.createClass({
       status: 'success',
       errorMessage: null
     });
-    window.setTimeout(function () {
-      return _this.setState({
-        status: 'default'
-      });
-    }, 2000);
+    this._timeout = window.setTimeout(function () {
+      if (this.__isMounted && this.setState) {
+        this.setState({
+          status: 'default'
+        });
+      }
+    }.bind(this), 1000);
     return _value;
   },
   __onInputChange: function __onInputChange(event, input) {

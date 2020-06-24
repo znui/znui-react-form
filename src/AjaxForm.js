@@ -145,22 +145,25 @@ module.exports = React.createClass({
 		}
 
 		_value = _return || _value;
-		if(!this.props.action){
+		var _submitApi = zn.extend({ url: this.props.action, method: this.props.method }, this.props.submitApi),
+			_method = this.props.method || _submitApi.method || 'post',
+			_key = _method.toLocaleLowerCase() == 'get' ? 'params': 'data';
+
+		if(!_submitApi[_key]) {
+			_submitApi[_key] = {};
+		}
+		zn.extend(_submitApi[_key], _value);
+		if(!_submitApi.url || !_submitApi[_key]){
 			if(process.env.NODE_ENV == 'development'){
-				zn.debug('The form action is null, data: ', _value);
+				zn.error('The form action is null, data: ', _value);
 			}
 			return false;
 		}
-		var _key = this.props.method.toLowCase() == 'get' ? 'params': 'data';
-		var _call = {
-			url: this.props.action,
-			method: this.props.method
-		};
-		_call[_key] = _value;
+
 		if(this.state.submit){
-			this.state.submit.call(_call);
+			this.state.submit.call(_submitApi);
 		}else{
-			this.state.submit = zn.data.create(_call, {
+			this.state.submit = zn.data.create(_submitApi, {
 				before: function (sender, data){
 					this.setState({ submitting: true });
 					this.props.onSubmiting && this.props.onSubmiting(data, this);
@@ -168,6 +171,9 @@ module.exports = React.createClass({
 				after: function (sender, data){
 					this.setState({ submitting: false });
 					this.props.onSubmited && this.props.onSubmited(data, this);
+				}.bind(this),
+				error: function (sender, xhr){
+					this.props.onSubmitError && this.props.onSubmitError(xhr, this);
 				}.bind(this)
 			}, this.props.context);
 		}

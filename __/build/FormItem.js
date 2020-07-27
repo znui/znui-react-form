@@ -9,13 +9,14 @@ var FormItem = React.createClass({
   getDefaultProps: function getDefaultProps() {
     return {
       disabled: false,
-      required: true
+      required: false
     };
   },
   getInitialState: function getInitialState() {
     return {
       status: 'default',
       value: this.props.value,
+      text: this.props.text,
       errorMessage: null
     };
   },
@@ -69,7 +70,6 @@ var FormItem = React.createClass({
   },
   __onInputChange: function __onInputChange(event, input) {
     event.formitem = this;
-    this.state.value = event.value;
 
     var _return = this.props.onChange && this.props.onChange(event, input, this);
 
@@ -77,11 +77,11 @@ var FormItem = React.createClass({
       return false;
     }
 
+    this.state.value = event.value;
     this.props.onInputChange && this.props.onInputChange(event, input, this);
   },
   __onInputEnter: function __onInputEnter(event, input) {
     event.formitem = this;
-    this.state.value = event.value;
 
     var _return = this.props.onEnter && this.props.onEnter(event, input, this);
 
@@ -89,6 +89,7 @@ var FormItem = React.createClass({
       return false;
     }
 
+    this.state.value = event.value;
     this.props.onInputEnter && this.props.onInputEnter(event, input, this);
   },
   __renderHeader: function __renderHeader() {

@@ -2,6 +2,8 @@
 
 function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
 
+function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
+
 var React = znui.React || require('react');
 
 var FormItem = require('./FormItem');
@@ -9,6 +11,8 @@ var FormItem = require('./FormItem');
 var FormGroup = require('./FormGroup');
 
 var FormButtons = require('./FormButtons');
+
+var popup = require('znui-react-popup');
 
 module.exports = React.createClass({
   displayName: 'ZRAjaxForm',
@@ -34,51 +38,12 @@ module.exports = React.createClass({
       submitting: false,
       hiddens: {},
       data: {},
+      value: {},
       refs: {}
     };
   },
-  componentDidMount: function componentDidMount() {
-    this.__initValue();
-  },
-  __initValue: function __initValue() {
-    var _value = this.props.value;
-
-    if (_value) {
-      if (_value.__api__) {
-        this.__initApiValue(_value);
-      } else {
-        this.__initObjectValue(_value);
-      }
-    }
-  },
-  __initApiValue: function __initApiValue(value) {
-    var _events = this.props.events || {},
-        _before = _events.before,
-        _after = _events.after;
-
-    this.state.data = zn.data.create(value, zn.extend(_events, {
-      before: function (sender, data) {
-        this.setState({
-          submitting: true
-        });
-        this.props.onValueLoading && this.props.onValueLoading(data, this);
-        _before && _before(sender, data);
-      }.bind(this),
-      after: function (sender, data) {
-        this.setState({
-          submitting: false
-        });
-        this.setValue(data);
-        this.props.onValueFinished && this.props.onValueFinished(data, this);
-        _after && _after(sender, data);
-      }.bind(this)
-    }), this.props.context);
-  },
-  __initObjectValue: function __initObjectValue(value) {
-    this.props.onValueLoading && this.props.onValueLoading(value, this);
-    this.setValue(value);
-    this.props.onValueFinished && this.props.onValueFinished(value, this);
-  },
+  componentDidMount: function componentDidMount() {},
+  componentWillUnmount: function componentWillUnmount() {},
   cancel: function cancel() {
     this.props.onCancel && this.props.onCancel(this);
   },
@@ -106,7 +71,7 @@ module.exports = React.createClass({
     this.props.onReset && this.props.onReset();
   },
   getValue: function getValue(callback) {
-    var _value = this.validate();
+    var _value = this.validate(callback);
 
     if (!_value) {
       return false;
@@ -123,13 +88,20 @@ module.exports = React.createClass({
 
     return zn.extend(_value, this.props.exts), _value;
   },
+  __isApiValue: function __isApiValue(value) {
+    if (value && _typeof(value) == 'object' && value.__api__) {
+      return true;
+    }
+
+    return false;
+  },
   setValue: function setValue(value, callback) {
     if (!value) {
       return this;
     }
 
-    if (value.__api__) {
-      return this.state.data.call(value), this;
+    if (this.__isApiValue(value) && this.state.data) {
+      return this.state.data.call(value, callback), this;
     }
 
     if (zn.is(value, 'object')) {
@@ -137,28 +109,28 @@ module.exports = React.createClass({
         this.state.hiddens[key] = value[key] || this.state.hiddens[key];
       }
 
-      var _refs = this.refs;
-      setTimeout(function () {
-        var _ref = null,
-            _value = null,
-            _text = null;
+      var _refs = this.refs,
+          _ref = null,
+          _value = null,
+          _text = null;
 
-        for (var key in _refs) {
-          _ref = _refs[key];
+      for (var key in _refs) {
+        _ref = _refs[key];
 
-          if (!_ref) {
-            continue;
-          }
-
-          _value = value[key];
-          _text = value[key + '_convert'];
-
-          if (_value !== null) {
-            _ref.setValue(_value, _text);
-          }
+        if (!_ref) {
+          continue;
         }
-      }, 0);
+
+        _value = value[key];
+        _text = value[key + '_convert'];
+
+        if (_value !== null) {
+          _ref.setValue(_value, _text);
+        }
+      }
     }
+
+    return this;
   },
   submit: function submit(callback) {
     var _value = this.getValue();
@@ -197,20 +169,29 @@ module.exports = React.createClass({
     }
 
     if (this.state.submit) {
-      this.state.submit.call(_submitApi);
+      this.state.submit.call(_submitApi, callback);
     } else {
       this.state.submit = zn.data.create(_submitApi, {
         before: function (sender, data) {
-          this.setState({
-            submitting: true
-          });
+          if (this.__isMounted) {
+            this.setState({
+              submitting: true
+            });
+          }
+
           this.props.onSubmiting && this.props.onSubmiting(data, this);
         }.bind(this),
         after: function (sender, data) {
-          this.setState({
-            submitting: false
-          });
+          if (this.__isMounted) {
+            this.setState({
+              submitting: false
+            });
+          }
+
           this.props.onSubmited && this.props.onSubmited(data, this);
+        }.bind(this),
+        success: function (sender, data) {
+          this.props.onSubmitSuccess && this.props.onSubmitSuccess(data, this);
         }.bind(this),
         error: function (sender, xhr) {
           this.props.onSubmitError && this.props.onSubmitError(xhr, this);
@@ -235,12 +216,16 @@ module.exports = React.createClass({
     for (var key in _refs) {
       _ref = _refs[key];
 
-      if (!_ref) {
+      if (!_ref || !_ref.props.required) {
         continue;
       }
 
-      if (!_noValidate && _ref.validate && !_ref.validate(callback)) {
-        return false;
+      if (!_noValidate && _ref.validate) {
+        _value = _ref.validate(callback);
+
+        if (_value === undefined || _value === null) {
+          return false;
+        }
       }
 
       if (_ref.getValue) {
@@ -268,8 +253,7 @@ module.exports = React.createClass({
     return value;
   },
   __onItemInputChange: function __onItemInputChange(event, input, formitem) {
-    var _value = formitem.validate();
-
+    event.validateValue = formitem.validate();
     this.props.onItemInputChange && this.props.onItemInputChange(event, input, formitem);
   },
   __itemRender: function __itemRender(item, index) {
@@ -279,11 +263,16 @@ module.exports = React.createClass({
       return this.state.hiddens[item.name] = item.value != null ? this.__parseItemValue(item.value) : null, null;
     }
 
+    var _name = item.name,
+        _value = this.state.value || {};
+
     return /*#__PURE__*/React.createElement(FormItem, _extends({}, item, {
       key: index,
       ref: function ref(_ref2) {
-        return _this.state.refs[item.name] = _ref2;
+        return _this.state.refs[_name] = _ref2;
       },
+      value: _value[_name],
+      text: _value[_name + '_convert'],
       onInputChange: this.__onItemInputChange,
       onInputEnter: this.submit
     }));
@@ -291,7 +280,8 @@ module.exports = React.createClass({
   __renderItems: function __renderItems() {
     return /*#__PURE__*/React.createElement(FormGroup, {
       data: this.props.data,
-      itemRender: this.__itemRender
+      itemRender: this.__itemRender,
+      responseHandler: this.props.responseHandler
     });
   },
   __renderGroups: function __renderGroups() {
@@ -303,7 +293,8 @@ module.exports = React.createClass({
       className: "groups"
     }, this.props.groups.map(function (group) {
       return /*#__PURE__*/React.createElement(FormGroup, _extends({}, group, {
-        itemRender: this.__itemRender
+        itemRender: this.__itemRender,
+        responseHandler: this.props.responseHandler
       }));
     }.bind(this)));
   },
@@ -319,8 +310,27 @@ module.exports = React.createClass({
       onCancel: this.cancel
     });
   },
-  render: function render() {
-    this.state.hiddens = {};
+  __onValueLoading: function __onValueLoading(data) {
+    this.setState({
+      submitting: true
+    });
+    this.props.onValueLoading && this.props.onValueLoading(data, this);
+  },
+  __onValueLoaded: function __onValueLoaded(data) {
+    this.setState({
+      value: data,
+      submitting: false
+    });
+    this.props.onValueLoaded && this.props.onValueLoaded(data, this);
+  },
+  __onValueLoadError: function __onValueLoadError(xhr) {
+    this.setState({
+      submitting: false
+    });
+    this.props.onValueLoadError && this.props.onValueLoadError(xhr);
+    popup.notifier.error("Error: " + xhr.message);
+  },
+  __render: function __render() {
     return /*#__PURE__*/React.createElement("div", {
       style: znui.react.style(this.props.style),
       className: znui.react.classname('zr-form zr-ajax-form', this.props.className)
@@ -330,6 +340,43 @@ module.exports = React.createClass({
       className: "loader"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text"
-    }, "Submitting ...")));
+    }, "Submitting ... ")));
+  },
+  __loadingRender: function __loadingRender() {
+    return /*#__PURE__*/React.createElement("div", {
+      style: znui.react.style(this.props.style),
+      className: znui.react.classname('zr-form zr-ajax-form', this.props.className)
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "zr-form-loader"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "loader"
+    }), /*#__PURE__*/React.createElement("span", {
+      className: "text"
+    }, "Loading ... ")));
+  },
+  render: function render() {
+    var _this2 = this;
+
+    this.state.hiddens = {};
+
+    if (this.__isApiValue(this.props.value)) {
+      return /*#__PURE__*/React.createElement(znui.react.DataLifecycle, {
+        data: this.props.value,
+        loadingRender: this.__loadingRender,
+        onLoading: this.__onValueLoading,
+        onFinished: this.__onValueLoaded,
+        onError: this.__onValueLoadError,
+        onDataCreated: function onDataCreated(data) {
+          return _this2.state.data = data;
+        },
+        dataRender: this.__render
+      });
+    }
+
+    if (this.props.value && _typeof(this.props.value) == 'object') {
+      this.state.value = this.props.value;
+    }
+
+    return this.__render();
   }
 });

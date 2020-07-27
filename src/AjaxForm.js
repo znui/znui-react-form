@@ -2,6 +2,7 @@ var React = znui.React || require('react');
 var FormItem = require('./FormItem');
 var FormGroup = require('./FormGroup');
 var FormButtons = require('./FormButtons');
+var popup = require('znui-react-popup');
 
 module.exports = React.createClass({
 	displayName:'ZRAjaxForm',
@@ -13,7 +14,7 @@ module.exports = React.createClass({
 			encType: "multipart/form-data",
 			buttons: [
 				{ value: '取消', type: 'cancel', icon: 'faTimes' },
-				{ value: '提交', type: 'submit', icon: 'faHandPointUp' },
+				{ value: '提交', type: 'submit', icon: 'faHandPointUp' }
 			]
 		}
 	},
@@ -22,48 +23,15 @@ module.exports = React.createClass({
 			submitting: false,
 			hiddens: { },
 			data: { },
+			value: { },
 			refs: { }
 		};
 	},
-	componentDidMount:function(){ 
-		this.__initValue();
+	componentDidMount: function(){ 
+		
 	},
-	__initValue: function (){
-		var _value = this.props.value;
-		if(_value){
-			if(_value.__api__){
-				this.__initApiValue(_value);
-			}else{
-				this.__initObjectValue(_value);
-			}
-		}
-	},
-	__initApiValue: function (value){
-		var _events = this.props.events || {},
-			_before = _events.before,
-			_after = _events.after;
-		this.state.data = zn.data.create(value, zn.extend(_events, {
-			before: function (sender, data){
-				this.setState({
-					submitting: true
-				});
-				this.props.onValueLoading && this.props.onValueLoading(data, this);
-				_before && _before(sender, data);
-			}.bind(this),
-			after: function (sender, data){
-				this.setState({
-					submitting: false
-				});
-				this.setValue(data);
-				this.props.onValueFinished && this.props.onValueFinished(data, this);
-				_after && _after(sender, data);
-			}.bind(this)
-		}), this.props.context);
-	},
-	__initObjectValue: function (value){
-		this.props.onValueLoading && this.props.onValueLoading(value, this);
-		this.setValue(value);
-		this.props.onValueFinished && this.props.onValueFinished(value, this);
+	componentWillUnmount: function (){
+
 	},
 	cancel: function (){
 		this.props.onCancel && this.props.onCancel(this);
@@ -88,7 +56,7 @@ module.exports = React.createClass({
 		this.props.onReset && this.props.onReset();
 	},
 	getValue: function (callback){
-		var _value = this.validate();
+		var _value = this.validate(callback);
 		if(!_value){
 			return false;
 		}
@@ -103,35 +71,41 @@ module.exports = React.createClass({
 
 		return zn.extend(_value, this.props.exts), _value;
 	},
+	__isApiValue: function (value){
+		if(value && typeof value == 'object' && value.__api__){
+			return true;
+		}
+
+		return false;
+	},
 	setValue: function (value, callback){
 		if(!value){
 			return this;
 		}
-		if(value.__api__){
-			return this.state.data.call(value), this;
+		if(this.__isApiValue(value) && this.state.data){
+			return this.state.data.call(value, callback), this;
 		}
 		if(zn.is(value, 'object')){
 			for(var key in this.state.hiddens){
 				this.state.hiddens[key] = value[key] || this.state.hiddens[key];
 			}
 
-			var _refs = this.refs;
-			setTimeout(function (){
-				var _ref = null,
-					_value = null,
-					_text = null;
-				for(var key in _refs){
-					_ref = _refs[key];
-					if(!_ref) { continue; }
-					_value = value[key];
-					_text = value[key+'_convert'];
-					if(_value !== null){
-						_ref.setValue(_value, _text);
-					}
+			var _refs = this.refs,
+				_ref = null,
+				_value = null,
+				_text = null;
+			for(var key in _refs){
+				_ref = _refs[key];
+				if(!_ref) { continue; }
+				_value = value[key];
+				_text = value[key+'_convert'];
+				if(_value !== null){
+					_ref.setValue(_value, _text);
 				}
-			}, 0);
+			}
 		}
 		
+		return this;
 	},
 	submit: function (callback){
 		var _value = this.getValue();
@@ -161,16 +135,23 @@ module.exports = React.createClass({
 		}
 
 		if(this.state.submit){
-			this.state.submit.call(_submitApi);
+			this.state.submit.call(_submitApi, callback);
 		}else{
 			this.state.submit = zn.data.create(_submitApi, {
 				before: function (sender, data){
-					this.setState({ submitting: true });
+					if(this.__isMounted){
+						this.setState({ submitting: true });
+					}
 					this.props.onSubmiting && this.props.onSubmiting(data, this);
 				}.bind(this),
 				after: function (sender, data){
-					this.setState({ submitting: false });
+					if(this.__isMounted){
+						this.setState({ submitting: false });
+					}
 					this.props.onSubmited && this.props.onSubmited(data, this);
+				}.bind(this),
+				success: function (sender, data){
+					this.props.onSubmitSuccess && this.props.onSubmitSuccess(data, this);
 				}.bind(this),
 				error: function (sender, xhr){
 					this.props.onSubmitError && this.props.onSubmitError(xhr, this);
@@ -192,9 +173,12 @@ module.exports = React.createClass({
 			_value = null;
 		for(var key in _refs){
 			_ref = _refs[key];
-			if(!_ref) { continue; }
-			if(!_noValidate && _ref.validate && !_ref.validate(callback)){
-				return false;
+			if(!_ref || !_ref.props.required) { continue; }
+			if(!_noValidate && _ref.validate){
+				_value = _ref.validate(callback);
+				if(_value === undefined || _value === null){
+					return false;
+				}
 			}
 			if(_ref.getValue){
 				_value = _ref.getValue(callback);
@@ -221,17 +205,25 @@ module.exports = React.createClass({
 		return value;
 	},
 	__onItemInputChange: function (event, input, formitem){
-		var _value = formitem.validate();
+		event.validateValue = formitem.validate();
 		this.props.onItemInputChange && this.props.onItemInputChange(event, input, formitem);
 	},
 	__itemRender: function (item, index){
 		if(item.type=='ZRHidden'){
 			return this.state.hiddens[item.name] = item.value!=null ? this.__parseItemValue(item.value): null, null;
 		}
-		return <FormItem {...item} key={index} ref={(ref)=>this.state.refs[item.name] = ref} onInputChange={this.__onItemInputChange} onInputEnter={this.submit}/>;
+		var _name = item.name,
+			_value = this.state.value || {};
+		return <FormItem {...item} 
+					key={index} 
+					ref={(ref)=>this.state.refs[_name] = ref} 
+					value={_value[_name]}
+					text={_value[_name + '_convert']}
+					onInputChange={this.__onItemInputChange} 
+					onInputEnter={this.submit} />;
 	},
 	__renderItems: function (){
-		return <FormGroup data={this.props.data} itemRender={this.__itemRender} />;
+		return <FormGroup data={this.props.data} itemRender={this.__itemRender} responseHandler={this.props.responseHandler} />;
 	},
 	__renderGroups: function (){
 		if(!this.props.groups) {
@@ -241,7 +233,7 @@ module.exports = React.createClass({
 			<div className="groups">
 				{
 					this.props.groups.map(function (group){
-						return <FormGroup {...group} itemRender={this.__itemRender} />
+						return <FormGroup {...group} itemRender={this.__itemRender} responseHandler={this.props.responseHandler} />;
 					}.bind(this))
 				}
 			</div>
@@ -251,16 +243,59 @@ module.exports = React.createClass({
 		if(!this.props.buttons){ return null; }
 		return <FormButtons data={this.props.buttons} onSubmit={this.submit} onReset={this.reset} onCancel={this.cancel} />;
 	},
-	render:function(){
-		this.state.hiddens = {};
+	__onValueLoading: function (data){
+		this.setState({
+			submitting: true
+		});
+		this.props.onValueLoading && this.props.onValueLoading(data, this);
+	},
+	__onValueLoaded: function (data){
+		this.setState({ value: data, submitting: false });
+		this.props.onValueLoaded && this.props.onValueLoaded(data, this);
+	},
+	__onValueLoadError: function (xhr){
+		this.setState({ submitting: false });
+		this.props.onValueLoadError && this.props.onValueLoadError(xhr);
+		popup.notifier.error("Error: " + xhr.message);
+	},
+	__render: function (){
 		return (
 			<div style={znui.react.style(this.props.style)}
 				className={znui.react.classname('zr-form zr-ajax-form', this.props.className)} >
 				{this.__renderItems()}
 				{this.__renderGroups()}
 				{this.__renderButtons()}
-				{this.state.submitting && <div className="zr-form-loader"><span className="loader" /><span className="text">Submitting ...</span></div>}
+				{this.state.submitting && <div className="zr-form-loader"><span className="loader" /><span className="text">Submitting ... </span></div>}
 			</div>
 		);
+	},
+	__loadingRender: function (){
+		return (
+			<div style={znui.react.style(this.props.style)}
+				className={znui.react.classname('zr-form zr-ajax-form', this.props.className)}>
+				<div className="zr-form-loader"><span className="loader" /><span className="text">Loading ... </span></div>
+			</div>
+		);
+	},
+	render:function(){
+		this.state.hiddens = {};
+		if(this.__isApiValue(this.props.value)){
+			return (
+				<znui.react.DataLifecycle
+					data={this.props.value}
+					loadingRender={this.__loadingRender}
+					onLoading={this.__onValueLoading}
+					onFinished={this.__onValueLoaded}
+					onError={this.__onValueLoadError}
+					onDataCreated={(data)=>this.state.data = data}
+					dataRender={this.__render} />
+			);
+		}
+
+		if(this.props.value && typeof this.props.value == 'object'){
+			this.state.value = this.props.value;
+		}
+		
+		return this.__render();
 	}
 });

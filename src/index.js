@@ -5,5 +5,6 @@ module.exports = {
     FormGroup: require('./FormGroup'),
     FormItem: require('./FormItem'),
     FormTitle: require('./FormTitle'),
+    FormPanel: require('./FormPanel'),
     NativeForm: require('./NativeForm')
 };

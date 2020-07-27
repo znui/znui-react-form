@@ -1,3 +1,7 @@
+.zr-ajax-form {
+  position: relative;
+  min-height: 100px;
+}
 .zr-form {
   font-family: sans-serif;
 }
@@ -187,6 +191,23 @@
   text-align: center;
   padding: 2px 6px;
   word-break: break-word;
+}
+.zr-form-panel {
+  background-color: #FFF;
+  border: 1px solid #e6e3e3;
+  border-radius: 3px;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12);
+}
+.zr-form-panel > .panel-title {
+  line-height: 38px;
+  padding: 0px 5px;
+  border-bottom: 1px solid #e6e3e3;
+  background-color: #fbfbfb;
+  font-weight: 600;
+  color: #8c8d8e;
+}
+.zr-form-panel > .panel-content {
+  padding: 5px;
 }
 .zr-native-form {
   position: relative;

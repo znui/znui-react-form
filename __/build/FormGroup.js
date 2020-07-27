@@ -8,6 +8,8 @@ var FormItem = require('./FormItem');
 
 var loader = require('znui-react-loader');
 
+var popup = require('znui-react-popup');
+
 module.exports = React.createClass({
   displayName: 'ZRFormGroup',
   getInitialState: function getInitialState() {
@@ -36,6 +38,12 @@ module.exports = React.createClass({
       loading: false
     });
   },
+  __onError: function __onError(xhr) {
+    this.setState({
+      loading: false
+    });
+    popup.notifier.error("Error: " + xhr.message);
+  },
   render: function render() {
     return /*#__PURE__*/React.createElement("div", {
       className: znui.react.classname("zr-form-group", this.props.className),
@@ -43,7 +51,8 @@ module.exports = React.createClass({
     }, /*#__PURE__*/React.createElement(znui.react.DataView, _extends({}, this.props, {
       itemRender: this.__itemRender,
       onLoading: this.__onLoading,
-      onFinished: this.__onFinished
+      onFinished: this.__onFinished,
+      onError: this.__onError
     })), this.state.loading && /*#__PURE__*/React.createElement(loader.Loader, {
       content: "...",
       loader: "circle",

@@ -21,14 +21,19 @@
   padding: 6px;
 }
 .zr-form-item {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
   display: flex;
-  margin: 2px 0px;
-  padding: 2px 0px;
+  margin: 6px 0px;
+  padding: 3px 0px;
+  border-bottom: 1px solid transparent;
   /*
     &.default{
         .zr-status(@zr-color-default);
     }*/
+}
+.zr-form-item:hover {
+  color: #010810;
+  font-weight: 400;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.03);
 }
 .zr-form-item.row {
   flex-direction: row;
@@ -90,7 +95,8 @@
   text-align: right;
   min-width: 100px;
   line-height: 24px;
-  padding-right: 10px;
+  padding-right: 12px;
+  font-weight: 200;
 }
 .zr-form-item > .zrfi-header > .icon {
   text-align: center;
@@ -100,9 +106,15 @@
 .zr-form-item > .zrfi-body {
   position: relative;
   flex: 1;
+  font-weight: 200;
   font-size: 14px;
   min-height: 24px;
   border-radius: 3px;
+}
+.zr-form-item > .zrfi-body input,
+.zr-form-item > .zrfi-body textarea,
+.zr-form-item > .zrfi-body select,
+.zr-form-item > .zrfi-body.input {
   border: 1px solid #f1eded;
   background-color: hsla(0, 0%, 94.5%, 0.4);
 }

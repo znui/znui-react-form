@@ -1,6 +1,6 @@
 {
   "name": "znui-react-form",
-  "version": "2.0.5",
+  "version": "2.0.6",
   "description": "Web form component.",
   "main": "index.js",
   "scripts": {
@@ -12,6 +12,7 @@
     "zr.prod.dist.watch": "rimraf ./__/dist/production && webpack --config ./__/production.js --znui-react.path ../../  --uglify --watch",
     "zr.prod.build": "rimraf ./__/build && babel src -d __/build/",
     "zr.prod.build.watch": "rimraf ./__/build && babel src -d __/build/ --watch",
+    "zr.dev.style.watch": "rimraf ./__/dist/development/index.style.bundle.css && webpack --config ./__/development.style.js --znui-react.path ../../ --watch",
     "zr.dev.dist": "rimraf ./__/dist/development && webpack --config ./__/development.js --znui-react.path ../../",
     "zr.dev.dist.watch": "rimraf ./__/dist/development && webpack --config ./__/development.js --znui-react.path ../../ --watch",
     "zr.release": "npm run zr.prod.build && npm run zr.prod.dist && npm run zr.dev.dist",

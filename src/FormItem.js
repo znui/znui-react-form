@@ -26,7 +26,7 @@ var FormItem = React.createClass({
 		this.setState({
 			value: value,
 			text: text
-		});
+		}, ()=>this.validate());
 	},
 	getValue: function (callback){
 		return this.state.value;
@@ -63,11 +63,11 @@ var FormItem = React.createClass({
 	},
 	__onInputChange: function (event, input){
 		event.formitem = this;
+		this.state.value = event.value;
 		var _return = this.props.onChange && this.props.onChange(event, input, this);
 		if(_return === false){
 			return false;
 		}
-		this.state.value = event.value;
 		this.props.onInputChange && this.props.onInputChange(event, input, this);
 	},
 	__onInputEnter: function (event, input){
@@ -95,7 +95,12 @@ var FormItem = React.createClass({
 			onChange: this.__onInputChange,
 			onEnter: this.__onInputEnter
 		});
-		var _inputElement = znui.react.createReactElement(this.props.input, _inputProps);
+		var _input = this.props.input;
+		if(_input && typeof _input == 'function' && !_input.prototype.isReactComponent){
+			_input = _input.call(null, this, _inputProps);
+		}
+
+		var _inputElement = znui.react.createReactElement(_input, _inputProps);
 		return (
 			<div className="zrfi-body" data-zr-popup-tooltip={this.state.errorMessage}>
 				{ _inputElement }

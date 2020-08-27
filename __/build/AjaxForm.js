@@ -20,7 +20,6 @@ module.exports = React.createClass({
     return {
       action: null,
       method: "post",
-      noValidate: null,
       encType: "multipart/form-data",
       buttons: [{
         value: '取消',
@@ -139,6 +138,10 @@ module.exports = React.createClass({
       return false;
     }
 
+    if (process.env.NODE_ENV == 'development') {
+      zn.debug('AjaxForm submit Data: ', _value);
+    }
+
     var _return = this.props.onSubmitBefore && this.props.onSubmitBefore(_value, this);
 
     if (_return === false) {
@@ -210,20 +213,19 @@ module.exports = React.createClass({
     var _refs = this.state.refs,
         _ref = null,
         _data = {},
-        _noValidate = this.props.noValidate,
         _value = null;
 
     for (var key in _refs) {
       _ref = _refs[key];
 
-      if (!_ref || !_ref.props.required) {
+      if (!_ref) {
         continue;
       }
 
-      if (!_noValidate && _ref.validate) {
+      if (_ref.props.required && _ref.validate) {
         _value = _ref.validate(callback);
 
-        if (_value === undefined || _value === null) {
+        if (_value == null) {
           return false;
         }
       }
@@ -232,11 +234,11 @@ module.exports = React.createClass({
         _value = _ref.getValue(callback);
       }
 
-      if (_value === false) {
+      if (_ref.props.required && _value == null) {
         return false;
       }
 
-      if (_value === null) {
+      if (_value == null) {
         continue;
       }
 
@@ -271,15 +273,21 @@ module.exports = React.createClass({
       ref: function ref(_ref2) {
         return _this.state.refs[_name] = _ref2;
       },
-      value: _value[_name],
-      text: _value[_name + '_convert'],
-      onInputChange: this.__onItemInputChange,
-      onInputEnter: this.submit
+      value: item.value != null ? item.value : _value[_name],
+      text: item.text != null ? item.text : _value[_name + '_convert'],
+      onInputChange: item.onInputChange || this.__onItemInputChange,
+      onInputEnter: item.onInputEnter || this.submit
     }));
   },
   __renderItems: function __renderItems() {
+    var _data = this.props.data;
+
+    if (zn.is(_data, 'function')) {
+      _data = _data.call(null, this);
+    }
+
     return /*#__PURE__*/React.createElement(FormGroup, {
-      data: this.props.data,
+      data: _data,
       itemRender: this.__itemRender,
       responseHandler: this.props.responseHandler
     });

@@ -26,9 +26,13 @@ var FormItem = React.createClass({
     }
   },
   setValue: function setValue(value, text) {
+    var _this = this;
+
     this.setState({
       value: value,
       text: text
+    }, function () {
+      return _this.validate();
     });
   },
   getValue: function getValue(callback) {
@@ -70,6 +74,7 @@ var FormItem = React.createClass({
   },
   __onInputChange: function __onInputChange(event, input) {
     event.formitem = this;
+    this.state.value = event.value;
 
     var _return = this.props.onChange && this.props.onChange(event, input, this);
 
@@ -77,7 +82,6 @@ var FormItem = React.createClass({
       return false;
     }
 
-    this.state.value = event.value;
     this.props.onInputChange && this.props.onInputChange(event, input, this);
   },
   __onInputEnter: function __onInputEnter(event, input) {
@@ -110,7 +114,13 @@ var FormItem = React.createClass({
       onEnter: this.__onInputEnter
     });
 
-    var _inputElement = znui.react.createReactElement(this.props.input, _inputProps);
+    var _input = this.props.input;
+
+    if (_input && typeof _input == 'function' && !_input.prototype.isReactComponent) {
+      _input = _input.call(null, this, _inputProps);
+    }
+
+    var _inputElement = znui.react.createReactElement(_input, _inputProps);
 
     return /*#__PURE__*/React.createElement("div", {
       className: "zrfi-body",

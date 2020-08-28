@@ -9,7 +9,10 @@ module.exports = require(_path + 'znui-react/webpack').component.development(fun
             "znui-react": "zr",
             "znui-react-icon": "icon",
             "znui-react-button": "button",
-            "znui-react-loader": "loader"
+            "znui-react-loader": "loader",
+            "znui-react-input": "input",
+            "znui-react-popup": "popup",
+            "znui-react-selector": "selector"
         }
     };
 });

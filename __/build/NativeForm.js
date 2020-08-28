@@ -12,8 +12,6 @@ var FormGroup = require('./FormGroup');
 
 var FormButtons = require('./FormButtons');
 
-var loader = require('znui-react-loader');
-
 module.exports = React.createClass({
   displayName: 'ZRNativeForm',
   getDefaultProps: function getDefaultProps() {

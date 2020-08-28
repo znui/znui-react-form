@@ -1,5 +1,4 @@
 var React = znui.React || require('react');
-var icon = require('znui-react-icon');
 
 var FormItem = React.createClass({
 	displayName:'FormItem',
@@ -82,7 +81,7 @@ var FormItem = React.createClass({
 	__renderHeader: function (){
 		return (
 			<div className="zrfi-header">
-				{this.props.icon && <icon.SVGIcon icon={this.props.icon} />}
+				{this.props.icon && <span className="icon"><i className={"fa " + this.props.icon} /></span>}
 				{this.props.label && <div className="title">{this.props.label}</div>}
 			</div>
 		);

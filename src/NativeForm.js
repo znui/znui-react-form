@@ -3,7 +3,6 @@ var ReactDOM = znui.ReactDOM || require('react-dom');
 var FormItem = require('./FormItem');
 var FormGroup = require('./FormGroup');
 var FormButtons = require('./FormButtons');
-var loader = require('znui-react-loader');
 
 module.exports = React.createClass({
 	displayName:'ZRNativeForm',

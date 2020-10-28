@@ -8,12 +8,13 @@ module.exports = React.createClass({
 	displayName:'ZRAjaxForm',
 	getDefaultProps: function (){
 		return {
+			disabled: false,
 			action: null,
 			method: "post",
 			encType: "multipart/form-data",
 			buttons: [
-				{ value: '取消', type: 'cancel', icon: 'faTimes' },
-				{ value: '提交', type: 'submit', icon: 'faHandPointUp' }
+				{ value: '取消', type: 'cancel', icon: 'fa-times' },
+				{ value: '提交', type: 'submit', icon: 'fa-edit' }
 			]
 		}
 	},
@@ -272,6 +273,7 @@ module.exports = React.createClass({
 				{this.__renderGroups()}
 				{this.__renderButtons()}
 				{this.state.submitting && <div className="zr-form-loader"><span className="loader" /><span className="text">Submitting ... </span></div>}
+				{this.props.disabled && <div className="zr-form-disabled"></div>}
 			</div>
 		);
 	},

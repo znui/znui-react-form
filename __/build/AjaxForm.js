@@ -18,17 +18,18 @@ module.exports = React.createClass({
   displayName: 'ZRAjaxForm',
   getDefaultProps: function getDefaultProps() {
     return {
+      disabled: false,
       action: null,
       method: "post",
       encType: "multipart/form-data",
       buttons: [{
         value: '取消',
         type: 'cancel',
-        icon: 'faTimes'
+        icon: 'fa-times'
       }, {
         value: '提交',
         type: 'submit',
-        icon: 'faHandPointUp'
+        icon: 'fa-edit'
       }]
     };
   },
@@ -348,7 +349,9 @@ module.exports = React.createClass({
       className: "loader"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text"
-    }, "Submitting ... ")));
+    }, "Submitting ... ")), this.props.disabled && /*#__PURE__*/React.createElement("div", {
+      className: "zr-form-disabled"
+    }));
   },
   __loadingRender: function __loadingRender() {
     return /*#__PURE__*/React.createElement("div", {

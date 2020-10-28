@@ -2,26 +2,42 @@
   position: relative;
   min-height: 100px;
 }
+.zr-ajax-form .zr-form-disabled {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  cursor: not-allowed;
+  z-index: 100;
+  background-color: rgba(245, 245, 245, 0.4);
+}
 .zr-form {
   font-family: sans-serif;
 }
 .zr-form-buttons {
   text-align: center;
   margin: 5px 0px;
+  justify-content: center;
 }
 .zr-form-buttons .zr-button {
   min-width: 120px;
+  justify-content: center;
 }
 .zr-form-buttons .zr-button[type="cancel"] {
   background-color: #F44336;
   border-color: #F44336;
 }
 .zr-form-group {
-  margin: 6px;
-  padding: 6px;
+  margin: 0px;
+  padding: 12px;
 }
 .zr-form-item {
   display: flex;
+  flex-direction: column;
   margin: 6px 0px;
   padding: 3px 0px;
   border-bottom: 1px solid transparent;
@@ -89,14 +105,17 @@
 .zr-form-item > .zrfi-header {
   display: flex;
   align-items: center;
+  padding-bottom: 3px;
 }
 .zr-form-item > .zrfi-header > .title {
   position: relative;
-  text-align: right;
-  min-width: 100px;
-  line-height: 24px;
+  text-align: left;
+  line-height: 20px;
   padding-right: 12px;
-  font-weight: 200;
+  font-weight: 400;
+  color: #656464;
+  white-space: pre-wrap;
+  word-break: break-all;
 }
 .zr-form-item > .zrfi-header > .icon {
   text-align: center;
@@ -110,6 +129,7 @@
   font-size: 14px;
   min-height: 24px;
   border-radius: 3px;
+  color: #555353;
 }
 .zr-form-item > .zrfi-body input,
 .zr-form-item > .zrfi-body textarea,
@@ -117,6 +137,19 @@
 .zr-form-item > .zrfi-body.input {
   border: 1px solid #f1eded;
   background-color: hsla(0, 0%, 94.5%, 0.4);
+  line-height: 30px;
+  height: 30px;
+  color: #424040;
+}
+.zr-form-item > .zrfi-body input:focus,
+.zr-form-item > .zrfi-body textarea:focus,
+.zr-form-item > .zrfi-body select:focus,
+.zr-form-item > .zrfi-body.input:focus {
+  border-color: #40a9ff;
+  border-right-width: 1px!important;
+  outline: 0;
+  -webkit-box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
 }
 .zr-form-item > .zrfi-body > div {
   width: 100%;
@@ -128,6 +161,17 @@
   line-height: 30px;
   text-align: center;
   background-color: transparent;
+}
+.zr-form-item .zrfi-hint {
+  margin: 3px 0px;
+  padding: 1px 3px;
+  font-size: 10px;
+  color: #b1b1b1;
+}
+.zr-form-item .zrfi-hint .info-icon {
+  width: 10px;
+  height: 10px;
+  margin-right: 3px;
 }
 .zr-form-item .error-message {
   width: 20px;

@@ -10,6 +10,7 @@
 
 .zr-form-item{
     display: flex;
+    flex-direction: column;
     margin: 6px 0px;
     padding: 3px 0px;
     border-bottom: 1px solid transparent;
@@ -71,13 +72,16 @@
     &>.zrfi-header{
         display: flex;
         align-items: center;
+        padding-bottom: 3px;
         &>.title{
             position: relative;
-            text-align: right;
-            min-width: 100px;
-            line-height: 24px;
+            text-align: left;
+            line-height: 20px;
             padding-right: 12px;
-            font-weight: 200;
+            font-weight: 400;
+            color: #656464;
+            white-space: pre-wrap;
+            word-break: break-all;
         }
         &>.icon{
             text-align: center;
@@ -93,9 +97,20 @@
         font-size: 14px;
         min-height: 24px;
         border-radius: 3px;
+        color: #555353;
         input, textarea, select, &.input{
             border: 1px solid #f1eded;
             background-color: hsla(0,0%,94.5%,.4);
+            line-height: 30px;
+            height: 30px;
+            color: #424040;
+            &:focus{
+                border-color:#40a9ff;
+                border-right-width:1px!important;
+                outline:0;
+                -webkit-box-shadow:0 0 0 2px rgba(24,144,255,.2);
+                box-shadow:0 0 0 2px rgba(24,144,255,.2);
+            }
         }
         &>div{
             width: 100%;
@@ -109,6 +124,18 @@
             background-color: transparent;
         }
         
+    }
+
+    .zrfi-hint{
+        margin: 3px 0px;
+        padding: 1px 3px;
+        font-size: 10px;
+        color: #b1b1b1;
+        .info-icon{
+            width: 10px;
+            height: 10px;
+            margin-right: 3px;
+        }
     }
 
     .error-message{

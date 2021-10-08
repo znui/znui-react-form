@@ -4,6 +4,8 @@ function _extends() { _extends = Object.assign || function (target) { for (var i
 
 function _typeof(obj) { "@babel/helpers - typeof"; if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var React = znui.React || require('react');
 
 var FormItem = require('./FormItem');
@@ -34,15 +36,18 @@ module.exports = React.createClass({
     };
   },
   getInitialState: function getInitialState() {
-    return {
+    var _ref2;
+
+    return _ref2 = {
+      validateErrorMessage: null,
       submitting: false,
       hiddens: {},
-      data: {},
-      value: {},
-      refs: {}
-    };
+      value: {}
+    }, _defineProperty(_ref2, "value", zn.extend({}, this.props.value)), _defineProperty(_ref2, "data", []), _defineProperty(_ref2, "refs", {}), _ref2;
   },
-  componentDidMount: function componentDidMount() {},
+  componentDidMount: function componentDidMount() {
+    this.props.onDidMount && this.props.onDidMount(this);
+  },
   componentWillUnmount: function componentWillUnmount() {},
   cancel: function cancel() {
     this.props.onCancel && this.props.onCancel(this);
@@ -100,8 +105,8 @@ module.exports = React.createClass({
       return this;
     }
 
-    if (this.__isApiValue(value) && this.state.data) {
-      return this.state.data.call(value, callback), this;
+    if (this.__isApiValue(value) && this.state.value) {
+      return this.state.value.call(value, callback), this;
     }
 
     if (zn.is(value, 'object')) {
@@ -195,7 +200,11 @@ module.exports = React.createClass({
           this.props.onSubmited && this.props.onSubmited(data, this);
         }.bind(this),
         success: function (sender, data) {
-          this.props.onSubmitSuccess && this.props.onSubmitSuccess(data, this);
+          if (data.code == 200) {
+            this.props.onSubmitSuccess && this.props.onSubmitSuccess(data.result, this);
+          } else {
+            this.props.onSubmitError && this.props.onSubmitError(data, this);
+          }
         }.bind(this),
         error: function (sender, xhr) {
           this.props.onSubmitError && this.props.onSubmitError(xhr, this);
@@ -220,6 +229,10 @@ module.exports = React.createClass({
       _ref = _refs[key];
 
       if (!_ref) {
+        continue;
+      }
+
+      if (!_ref.props.submitted || _ref.props.editable === false) {
         continue;
       }
 
@@ -257,7 +270,17 @@ module.exports = React.createClass({
   },
   __onItemInputChange: function __onItemInputChange(event, input, formitem) {
     event.validateValue = formitem.validate();
-    this.props.onItemInputChange && this.props.onItemInputChange(event, input, formitem);
+    this.props.onInputChange && this.props.onInputChange(event, input, formitem);
+  },
+  __onValidateError: function __onValidateError(errMessage, formItem) {
+    this.setState({
+      validateErrorMessage: '输入框 “' + formItem.props.label + '” ' + errMessage
+    });
+  },
+  __onValidateSuccess: function __onValidateSuccess() {
+    this.setState({
+      validateErrorMessage: null
+    });
   },
   __itemRender: function __itemRender(item, index) {
     var _this = this;
@@ -266,22 +289,61 @@ module.exports = React.createClass({
       return this.state.hiddens[item.name] = item.value != null ? this.__parseItemValue(item.value) : null, null;
     }
 
-    var _name = item.name,
-        _value = this.state.value || {};
+    if (item.input && (item.input == 'zr.form.FormTitle' || item.input.displayName == 'ZRFormTitle')) {
+      if (typeof item.input == 'string') {
+        item.input = zn.path(window, item.input);
+      }
 
-    return /*#__PURE__*/React.createElement(FormItem, _extends({}, item, {
+      return /*#__PURE__*/React.createElement(item.input, _extends({
+        key: index
+      }, item));
+    }
+
+    var _name = item.name,
+        _value = this.state.value || {},
+        _value_ = _value[_name],
+        _text_ = _value[_name + '_convert'];
+
+    if (_value_ == null && item.value != null) {
+      _value_ = item.value;
+    }
+
+    if (_text_ == null && item.text != null) {
+      _text_ = item.text;
+    }
+
+    return /*#__PURE__*/React.createElement(FormItem, _extends({
+      context: this.props.context
+    }, item, {
       key: index,
-      ref: function ref(_ref2) {
-        return _this.state.refs[_name] = _ref2;
+      ref: function ref(_ref3) {
+        return _this.state.refs[_name] = _ref3;
       },
-      value: item.value != null ? item.value : _value[_name],
-      text: item.text != null ? item.text : _value[_name + '_convert'],
+      value: _value_,
+      text: _text_,
+      index: index,
+      form: this,
+      onValidateError: this.__onValidateError,
+      onValidateSuccess: this.__onValidateSuccess,
       onInputChange: item.onInputChange || this.__onItemInputChange,
       onInputEnter: item.onInputEnter || this.submit
     }));
   },
-  __renderItems: function __renderItems() {
+  __renderPropsData: function __renderPropsData() {
     var _data = this.props.data;
+
+    if (zn.is(_data, 'function')) {
+      _data = _data.call(null, this);
+    }
+
+    return /*#__PURE__*/React.createElement(FormGroup, {
+      data: _data,
+      itemRender: this.__itemRender,
+      responseHandler: this.props.responseHandler
+    });
+  },
+  __renderStateData: function __renderStateData() {
+    var _data = this.state.data;
 
     if (zn.is(_data, 'function')) {
       _data = _data.call(null, this);
@@ -339,17 +401,36 @@ module.exports = React.createClass({
     this.props.onValueLoadError && this.props.onValueLoadError(xhr);
     popup.notifier.error("Error: " + xhr.message);
   },
+  __renderValidateError: function __renderValidateError() {
+    if (this.state.validateErrorMessage) {
+      return /*#__PURE__*/React.createElement("div", {
+        className: "zr-form-validate-error"
+      }, /*#__PURE__*/React.createElement("svg", {
+        "aria-hidden": "true",
+        focusable: "false",
+        "data-prefix": "fas",
+        "data-icon": "times",
+        className: "svg-inline--fa fa-times fa-w-11 ",
+        role: "img",
+        xmlns: "http://www.w3.org/2000/svg",
+        viewBox: "0 0 352 512"
+      }, /*#__PURE__*/React.createElement("path", {
+        fill: "currentColor",
+        d: "M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"
+      })), /*#__PURE__*/React.createElement("span", null, this.state.validateErrorMessage));
+    }
+  },
   __render: function __render() {
     return /*#__PURE__*/React.createElement("div", {
       style: znui.react.style(this.props.style),
       className: znui.react.classname('zr-form zr-ajax-form', this.props.className)
-    }, this.__renderItems(), this.__renderGroups(), this.__renderButtons(), this.state.submitting && /*#__PURE__*/React.createElement("div", {
+    }, this.__renderPropsData(), this.__renderStateData(), this.__renderGroups(), this.__renderValidateError(), this.__renderButtons(), this.state.submitting && /*#__PURE__*/React.createElement("div", {
       className: "zr-form-loader"
     }, /*#__PURE__*/React.createElement("span", {
       className: "loader"
     }), /*#__PURE__*/React.createElement("span", {
       className: "text"
-    }, "Submitting ... ")), this.props.disabled && /*#__PURE__*/React.createElement("div", {
+    }, "\u63D0\u4EA4\u4E2D ... ")), this.props.disabled && /*#__PURE__*/React.createElement("div", {
       className: "zr-form-disabled"
     }));
   },
@@ -377,8 +458,8 @@ module.exports = React.createClass({
         onLoading: this.__onValueLoading,
         onFinished: this.__onValueLoaded,
         onError: this.__onValueLoadError,
-        onDataCreated: function onDataCreated(data) {
-          return _this2.state.data = data;
+        onDataCreated: function onDataCreated(value) {
+          return _this2.state.value = value;
         },
         dataRender: this.__render
       });

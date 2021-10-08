@@ -4,6 +4,7 @@ var FormItem = React.createClass({
 	displayName:'FormItem',
 	getDefaultProps: function (){
 		return {
+			submitted: true,
 			disabled: false,
 			required: false,
 			hint: null
@@ -26,18 +27,21 @@ var FormItem = React.createClass({
 		this.setState({
 			value: value,
 			text: text
-		}, ()=>this.validate());
+		});
 	},
 	getValue: function (callback){
 		return this.state.value;
 	},
 	validate: function (callback){
-		var _value = this.state.value;
+		var _value = this.state.value,
+			_error = this.props.error || "数据验证错误";
 		if(this.props.required && (_value === '' || _value == null)){
 			this.setState({
 				status: 'error',
-				errorMessage: this.props.error || "The field is required."
+				errorMessage: _error
 			});
+
+			this.props.onValidateError && this.props.onValidateError(_error, this);
 			return;
 		}
 
@@ -45,14 +49,18 @@ var FormItem = React.createClass({
 		if(_callback === false){
 			this.setState({
 				status: 'error',
-				errorMessage: this.props.error
+				errorMessage: _error
 			});
+
+			this.props.onValidateError && this.props.onValidateError(_error, this);
 			return;
 		}
 		this.setState({
 			status: 'success',
 			errorMessage: null
 		});
+		
+		this.props.onValidateSuccess && this.props.onValidateSuccess(this);
 		this._timeout = window.setTimeout(function (){
 			if(this.__isMounted && this.setState){
 				this.setState({ status: 'default' });
@@ -62,6 +70,10 @@ var FormItem = React.createClass({
 		return _value;
 	},
 	__onInputChange: function (event, input){
+		if(event.validate === false){
+			return this.state.value = null, false;
+		}
+
 		event.formitem = this;
 		this.state.value = event.value;
 		var _return = this.props.onChange && this.props.onChange(event, input, this);
@@ -71,6 +83,10 @@ var FormItem = React.createClass({
 		this.props.onInputChange && this.props.onInputChange(event, input, this);
 	},
 	__onInputEnter: function (event, input){
+		if(event.validate === false){
+			return this.state.value = null, false;
+		}
+
 		event.formitem = this;
 		var _return = this.props.onEnter && this.props.onEnter(event, input, this);
 		if(_return === false){
@@ -87,8 +103,14 @@ var FormItem = React.createClass({
 			</div>
 		);
 	},
+	__valueRender: function (props){
+		switch(props.type){
+			default:
+				return (<span className="item-value">{props.text || props.value}</span>);
+		}
+	},
 	__renderBody: function (){
-		var _inputProps = zn.extend({}, this.props, {
+		var _inputProps = zn.extend({}, this.props, this.props.inputProps, {
 			className: znui.react.classname('body-input', this.props.inputClassName),
 			value: this.state.value,
 			text: this.state.text,
@@ -97,10 +119,14 @@ var FormItem = React.createClass({
 		});
 		var _input = this.props.input;
 		if(_input && typeof _input == 'function' && !_input.prototype.isReactComponent){
-			_input = _input.call(null, this, _inputProps);
+			_input = _input.call(this.props.context || null, this, _inputProps);
 		}
 
-		var _inputElement = znui.react.createReactElement(_input, _inputProps);
+		var _inputElement = znui.react.createReactElement(_input, _inputProps, this.props.context);
+		/*
+		if(_inputProps.editable == false && _inputProps.value != null) {
+			_inputElement = this.__valueRender(_inputProps);
+		}*/
 		return (
 			<div className="zrfi-body" data-zr-popup-tooltip={this.state.errorMessage}>
 				{ _inputElement }
@@ -152,8 +178,5 @@ var FormItem = React.createClass({
 		);
 	}
 });
-
-
-
 
 module.exports = FormItem;

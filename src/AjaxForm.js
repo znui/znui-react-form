@@ -20,15 +20,17 @@ module.exports = React.createClass({
 	},
 	getInitialState: function (){
 		return {
+			validateErrorMessage: null,
 			submitting: false,
 			hiddens: { },
-			data: { },
 			value: { },
+			value: zn.extend({ }, this.props.value),
+			data: [],
 			refs: { }
 		};
 	},
 	componentDidMount: function(){ 
-		
+		this.props.onDidMount && this.props.onDidMount(this);
 	},
 	componentWillUnmount: function (){
 
@@ -82,8 +84,8 @@ module.exports = React.createClass({
 		if(!value){
 			return this;
 		}
-		if(this.__isApiValue(value) && this.state.data){
-			return this.state.data.call(value, callback), this;
+		if(this.__isApiValue(value) && this.state.value){
+			return this.state.value.call(value, callback), this;
 		}
 		if(zn.is(value, 'object')){
 			for(var key in this.state.hiddens){
@@ -155,7 +157,11 @@ module.exports = React.createClass({
 					this.props.onSubmited && this.props.onSubmited(data, this);
 				}.bind(this),
 				success: function (sender, data){
-					this.props.onSubmitSuccess && this.props.onSubmitSuccess(data, this);
+					if(data.code == 200) {
+						this.props.onSubmitSuccess && this.props.onSubmitSuccess(data.result, this);
+					}else{
+						this.props.onSubmitError && this.props.onSubmitError(data, this);
+					}
 				}.bind(this),
 				error: function (sender, xhr){
 					this.props.onSubmitError && this.props.onSubmitError(xhr, this);
@@ -177,6 +183,7 @@ module.exports = React.createClass({
 		for(var key in _refs){
 			_ref = _refs[key];
 			if(!_ref) { continue; }
+			if(!_ref.props.submitted || _ref.props.editable === false){ continue; }
 			if(_ref.props.required && _ref.validate){
 				_value = _ref.validate(callback);
 				if(_value == null){
@@ -209,24 +216,61 @@ module.exports = React.createClass({
 	},
 	__onItemInputChange: function (event, input, formitem){
 		event.validateValue = formitem.validate();
-		this.props.onItemInputChange && this.props.onItemInputChange(event, input, formitem);
+		this.props.onInputChange && this.props.onInputChange(event, input, formitem);
+	},
+	__onValidateError: function (errMessage, formItem){
+		this.setState({
+			validateErrorMessage: '输入框 “' + formItem.props.label + '” ' + errMessage
+		});
+	},
+	__onValidateSuccess: function (){
+		this.setState({
+			validateErrorMessage: null
+		});
 	},
 	__itemRender: function (item, index){
 		if(item.type=='ZRHidden'){
 			return this.state.hiddens[item.name] = item.value!=null ? this.__parseItemValue(item.value): null, null;
 		}
+		if(item.input && (item.input == 'zr.form.FormTitle' || item.input.displayName == 'ZRFormTitle')) {
+			if(typeof item.input == 'string'){
+				item.input = zn.path(window, item.input);
+			}
+			return <item.input key={index} {...item} />;
+		}
 		var _name = item.name,
-			_value = this.state.value || {};
-		return <FormItem {...item} 
+			_value = this.state.value || {},
+			_value_ = _value[_name],
+			_text_ = _value[_name + '_convert'];
+		if(_value_ == null && item.value != null){
+			_value_ = item.value;
+		}
+
+		if(_text_ == null && item.text != null){
+			_text_ = item.text;
+		}
+
+		return <FormItem context={this.props.context} {...item} 
 					key={index} 
 					ref={(ref)=>this.state.refs[_name] = ref} 
-					value={ item.value != null ? item.value : _value[_name] }
-					text={ item.text != null ? item.text : _value[_name + '_convert']}
+					value={_value_}
+					text={_text_}
+					index={index}
+					form={this}
+					onValidateError={this.__onValidateError}
+					onValidateSuccess={this.__onValidateSuccess}
 					onInputChange={ item.onInputChange || this.__onItemInputChange } 
 					onInputEnter={ item.onInputEnter || this.submit } />;
 	},
-	__renderItems: function (){
+	__renderPropsData: function (){
 		var _data = this.props.data;
+		if(zn.is(_data, 'function')) {
+			_data = _data.call(null, this);
+		}
+		return <FormGroup data={_data} itemRender={this.__itemRender} responseHandler={this.props.responseHandler} />;
+	},
+	__renderStateData: function (){
+		var _data = this.state.data;
 		if(zn.is(_data, 'function')) {
 			_data = _data.call(null, this);
 		}
@@ -265,14 +309,26 @@ module.exports = React.createClass({
 		this.props.onValueLoadError && this.props.onValueLoadError(xhr);
 		popup.notifier.error("Error: " + xhr.message);
 	},
+	__renderValidateError: function (){
+		if(this.state.validateErrorMessage){
+			return (
+				<div className="zr-form-validate-error">
+					<svg aria-hidden="true" focusable="false" data-prefix="fas" data-icon="times" className="svg-inline--fa fa-times fa-w-11 " role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 352 512"><path fill="currentColor" d="M242.72 256l100.07-100.07c12.28-12.28 12.28-32.19 0-44.48l-22.24-22.24c-12.28-12.28-32.19-12.28-44.48 0L176 189.28 75.93 89.21c-12.28-12.28-32.19-12.28-44.48 0L9.21 111.45c-12.28 12.28-12.28 32.19 0 44.48L109.28 256 9.21 356.07c-12.28 12.28-12.28 32.19 0 44.48l22.24 22.24c12.28 12.28 32.2 12.28 44.48 0L176 322.72l100.07 100.07c12.28 12.28 32.2 12.28 44.48 0l22.24-22.24c12.28-12.28 12.28-32.19 0-44.48L242.72 256z"></path></svg>
+					<span>{this.state.validateErrorMessage}</span>
+				</div>
+			);
+		}
+	},
 	__render: function (){
 		return (
 			<div style={znui.react.style(this.props.style)}
 				className={znui.react.classname('zr-form zr-ajax-form', this.props.className)} >
-				{this.__renderItems()}
+				{this.__renderPropsData()}
+				{this.__renderStateData()}
 				{this.__renderGroups()}
+				{this.__renderValidateError()}
 				{this.__renderButtons()}
-				{this.state.submitting && <div className="zr-form-loader"><span className="loader" /><span className="text">Submitting ... </span></div>}
+				{this.state.submitting && <div className="zr-form-loader"><span className="loader" /><span className="text">提交中 ... </span></div>}
 				{this.props.disabled && <div className="zr-form-disabled"></div>}
 			</div>
 		);
@@ -295,7 +351,7 @@ module.exports = React.createClass({
 					onLoading={this.__onValueLoading}
 					onFinished={this.__onValueLoaded}
 					onError={this.__onValueLoadError}
-					onDataCreated={(data)=>this.state.data = data}
+					onDataCreated={(value)=>this.state.value = value}
 					dataRender={this.__render} />
 			);
 		}

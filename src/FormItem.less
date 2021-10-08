@@ -11,14 +11,20 @@
 .zr-form-item{
     display: flex;
     flex-direction: column;
-    margin: 6px 0px;
-    padding: 3px 0px;
-    border-bottom: 1px solid transparent;
+    margin: 3px 0px;
+    padding: 6px;
+    box-shadow: none;
+    transition: all 0.3s;
 
     &:hover{
-        color: #010810;
-        font-weight: 400;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+        color: #3498db !important;
+        background-color: #FFF;
+        border-radius: 2px;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.2), 0 1px 1px 0 rgba(0, 0, 0, 0.14), 0 2px 1px -1px rgba(0, 0, 0, 0.12);
+        /*box-shadow: 0 6px 12px rgba(0,0,0,.175)!important;*/
+        .title{
+            font-weight: bold;
+        }
     }
 
     &.row{
@@ -43,7 +49,7 @@
     }
 
     &[data-status="success"]{
-        .zr-status(@zr-color-success);
+        /*.zr-status(@zr-color-success);*/
     }
 
     &[data-status="info"]{
@@ -57,14 +63,14 @@
     &[data-status="error"]{
         .zr-status(@zr-color-danger);
         &>.zrfi-body{
-            box-shadow: 0 0 10px #dcd2d2;
+            box-shadow: 0 0 6px #dcd2d2;
             -webkit-animation-name: shineRed;
             -webkit-animation-duration: 1.5s;
             -webkit-animation-iteration-count: infinite;
             @-webkit-keyframes  shineRed {
-                from { -webkit-box-shadow: 0 0 5px #bbb; }
+                from { -webkit-box-shadow: 0 0 5px #dcd2d2; }
                 50% { -webkit-box-shadow: 0 0 10px @zr-color-danger; }
-                to { -webkit-box-shadow: 0 0 5px #bbb; }
+                to { -webkit-box-shadow: 0 0 5px #dcd2d2; }
             }
         }
     }
@@ -76,13 +82,13 @@
         &>.title{
             position: relative;
             text-align: left;
-            line-height: 20px;
+            line-height: 24px;
             padding-right: 12px;
-            font-weight: 400;
-            color: #656464;
+            font-weight: 500;
             white-space: pre-wrap;
             word-break: break-all;
         }
+
         &>.icon{
             text-align: center;
             min-width: 2rem;
@@ -94,27 +100,28 @@
         position: relative;
         flex: 1;
         font-weight: 200;
-        font-size: 14px;
-        min-height: 24px;
+        font-size: 16px;
+        min-height: 34px;
         border-radius: 3px;
-        color: #555353;
+        color: #616161;
         input, textarea, select, &.input{
-            border: 1px solid #f1eded;
-            background-color: hsla(0,0%,94.5%,.4);
-            line-height: 30px;
-            height: 30px;
-            color: #424040;
+            border: 1px solid#d8d8d8; //#f1eded;
             &:focus{
-                border-color:#40a9ff;
-                border-right-width:1px!important;
-                outline:0;
-                -webkit-box-shadow:0 0 0 2px rgba(24,144,255,.2);
-                box-shadow:0 0 0 2px rgba(24,144,255,.2);
+                outline: 0;
+                border-color: #40a9ff;
+                -webkit-box-shadow: 0 0 0 2px rgba(24,144,255,.2);
+                box-shadow: 0 0 0 2px rgba(24,144,255,.2);
             }
         }
-        &>div{
-            width: 100%;
+
+        input, select, &.input{
+            min-height: 34px;
         }
+
+        textarea {
+            min-height: 80px;
+        }
+
         & > .suffix{
             position: absolute;
             right: 0px;
@@ -126,11 +133,17 @@
         
     }
 
+    .item-value{
+        color: #ababab;
+        font-family: monospace;
+        line-height: 20px;
+    }
+
     .zrfi-hint{
         margin: 3px 0px;
         padding: 1px 3px;
         font-size: 10px;
-        color: #b1b1b1;
+        color: #ff9800;
         .info-icon{
             width: 10px;
             height: 10px;
@@ -145,6 +158,9 @@
         cursor: pointer;
     }
 
+    input, textarea, button {
+        -webkit-appearance: none;
+    }
 
     input, textarea, select, &.input{
         background-color: transparent;

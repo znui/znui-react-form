@@ -3,13 +3,14 @@
 var React = znui.React || require('react');
 
 module.exports = React.createClass({
-  displayName: 'ZRFormTitle',
+  displayName: 'ZRFormItemValue',
+  __render: function __render() {
+    switch (this.props.type) {}
+  },
   render: function render() {
     return /*#__PURE__*/React.createElement("div", {
-      className: znui.react.classname('zr-form-title', this.props.className),
+      className: znui.react.classname('zr-form-item-value', this.props.className),
       style: this.props.style
-    }, /*#__PURE__*/React.createElement("span", {
-      className: "zf-title"
-    }, this.props.label));
+    }, this.__render());
   }
 });

@@ -109,7 +109,7 @@ module.exports = React.createClass({
 		
 		return this;
 	},
-	submit: function (callback){
+	submit: function (callback, event){
 		var _value = this.getValue();
 		if(!_value){
 			return false;
@@ -119,7 +119,7 @@ module.exports = React.createClass({
 			zn.debug('AjaxForm submit Data: ', _value);
 		}
 
-		var _return = this.props.onSubmitBefore && this.props.onSubmitBefore(_value, this);
+		var _return = this.props.onSubmitBefore && this.props.onSubmitBefore(_value, this, event);
 		if(_return === false){
 			return false;
 		}
@@ -169,6 +169,9 @@ module.exports = React.createClass({
 			}, this.props.context);
 		}
 	},
+	__submit__: function (event, buttons){
+		this.submit(null, event)
+	},
 	__onSubmit: function (){
 		var _return = this.props.onSubmit && this.props.onSubmit();
 		if(_return === false){
@@ -216,7 +219,7 @@ module.exports = React.createClass({
 	},
 	__onItemInputChange: function (event, input, formitem){
 		event.validateValue = formitem.validate();
-		this.props.onInputChange && this.props.onInputChange(event, input, formitem);
+		return this.props.onInputChange && this.props.onInputChange(event, input, formitem, this);
 	},
 	__onValidateError: function (errMessage, formItem){
 		this.setState({
@@ -250,7 +253,8 @@ module.exports = React.createClass({
 			_text_ = item.text;
 		}
 
-		return <FormItem context={this.props.context} {...item} 
+		return (
+			<FormItem context={this.props.context} {...item} 
 					key={index} 
 					ref={(ref)=>this.state.refs[_name] = ref} 
 					value={_value_}
@@ -260,7 +264,8 @@ module.exports = React.createClass({
 					onValidateError={this.__onValidateError}
 					onValidateSuccess={this.__onValidateSuccess}
 					onInputChange={ item.onInputChange || this.__onItemInputChange } 
-					onInputEnter={ item.onInputEnter || this.submit } />;
+					onInputEnter={ item.onInputEnter || this.submit } />
+		);
 	},
 	__renderPropsData: function (){
 		var _data = this.props.data;
@@ -283,16 +288,16 @@ module.exports = React.createClass({
 		return (
 			<div className="groups">
 				{
-					this.props.groups.map(function (group){
+					this.props.groups.map((group)=>{
 						return <FormGroup {...group} itemRender={this.__itemRender} responseHandler={this.props.responseHandler} />;
-					}.bind(this))
+					})
 				}
 			</div>
 		);
 	},
 	__renderButtons: function (){
 		if(!this.props.buttons){ return null; }
-		return <FormButtons data={this.props.buttons} onSubmit={this.submit} onReset={this.reset} onCancel={this.cancel} />;
+		return <FormButtons data={this.props.buttons} onSubmit={this.__submit__} onReset={this.reset} onCancel={this.cancel} />;
 	},
 	__onValueLoading: function (data){
 		this.setState({
@@ -335,9 +340,11 @@ module.exports = React.createClass({
 	},
 	__loadingRender: function (){
 		return (
-			<div style={znui.react.style(this.props.style)}
-				className={znui.react.classname('zr-form zr-ajax-form', this.props.className)}>
-				<div className="zr-form-loader"><span className="loader" /><span className="text">Loading ... </span></div>
+			<div style={znui.react.style(this.props.style)} className={znui.react.classname('zr-form zr-ajax-form', this.props.className)}>
+				<div className="zr-form-loader">
+					<span className="loader" />
+					<span className="text">Loading ... </span>
+				</div>
 			</div>
 		);
 	},

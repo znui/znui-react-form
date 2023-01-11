@@ -80,7 +80,7 @@ var FormItem = React.createClass({
 		if(_return === false){
 			return false;
 		}
-		this.props.onInputChange && this.props.onInputChange(event, input, this);
+		return this.props.onInputChange && this.props.onInputChange(event, input, this);
 	},
 	__onInputEnter: function (event, input){
 		if(event.validate === false){

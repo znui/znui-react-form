@@ -40,7 +40,7 @@
   justify-content: center;
 }
 .zr-form-buttons .zr-button {
-  min-width: 120px;
+  min-width: 100px;
   justify-content: center;
 }
 .zr-form-buttons .zr-button[type="cancel"] {

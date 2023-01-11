@@ -137,7 +137,7 @@ module.exports = React.createClass({
 
     return this;
   },
-  submit: function submit(callback) {
+  submit: function submit(callback, event) {
     var _value = this.getValue();
 
     if (!_value) {
@@ -148,7 +148,7 @@ module.exports = React.createClass({
       zn.debug('AjaxForm submit Data: ', _value);
     }
 
-    var _return = this.props.onSubmitBefore && this.props.onSubmitBefore(_value, this);
+    var _return = this.props.onSubmitBefore && this.props.onSubmitBefore(_value, this, event);
 
     if (_return === false) {
       return false;
@@ -212,6 +212,9 @@ module.exports = React.createClass({
       }, this.props.context);
     }
   },
+  __submit__: function __submit__(event, buttons) {
+    this.submit(null, event);
+  },
   __onSubmit: function __onSubmit() {
     var _return = this.props.onSubmit && this.props.onSubmit();
 
@@ -270,7 +273,7 @@ module.exports = React.createClass({
   },
   __onItemInputChange: function __onItemInputChange(event, input, formitem) {
     event.validateValue = formitem.validate();
-    this.props.onInputChange && this.props.onInputChange(event, input, formitem);
+    return this.props.onInputChange && this.props.onInputChange(event, input, formitem, this);
   },
   __onValidateError: function __onValidateError(errMessage, formItem) {
     this.setState({
@@ -356,6 +359,8 @@ module.exports = React.createClass({
     });
   },
   __renderGroups: function __renderGroups() {
+    var _this2 = this;
+
     if (!this.props.groups) {
       return null;
     }
@@ -364,10 +369,10 @@ module.exports = React.createClass({
       className: "groups"
     }, this.props.groups.map(function (group) {
       return /*#__PURE__*/React.createElement(FormGroup, _extends({}, group, {
-        itemRender: this.__itemRender,
-        responseHandler: this.props.responseHandler
+        itemRender: _this2.__itemRender,
+        responseHandler: _this2.props.responseHandler
       }));
-    }.bind(this)));
+    }));
   },
   __renderButtons: function __renderButtons() {
     if (!this.props.buttons) {
@@ -376,7 +381,7 @@ module.exports = React.createClass({
 
     return /*#__PURE__*/React.createElement(FormButtons, {
       data: this.props.buttons,
-      onSubmit: this.submit,
+      onSubmit: this.__submit__,
       onReset: this.reset,
       onCancel: this.cancel
     });
@@ -447,7 +452,7 @@ module.exports = React.createClass({
     }, "Loading ... ")));
   },
   render: function render() {
-    var _this2 = this;
+    var _this3 = this;
 
     this.state.hiddens = {};
 
@@ -459,7 +464,7 @@ module.exports = React.createClass({
         onFinished: this.__onValueLoaded,
         onError: this.__onValueLoadError,
         onDataCreated: function onDataCreated(value) {
-          return _this2.state.value = value;
+          return _this3.state.value = value;
         },
         dataRender: this.__render
       });

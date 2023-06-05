@@ -182,10 +182,12 @@ module.exports = React.createClass({
 		var _refs = this.state.refs,
 			_ref = null,
 			_data = {},
-			_value = null;
+			_value = null,
+			_key = null;
 		for(var key in _refs){
 			_ref = _refs[key];
-			if(!_ref) { continue; }
+			_key = _ref.props.valueKey || key;
+			if(!_ref || !_key || !_ref.props.name) { continue; }
 			if(!_ref.props.submitted || _ref.props.editable === false){ continue; }
 			if(_ref.props.required && _ref.validate){
 				_value = _ref.validate(callback);
@@ -205,7 +207,7 @@ module.exports = React.createClass({
 				continue;
 			}
 
-			_data[_ref.props.valueKey || key] = _value;
+			_data[_key] = _value;
 		}
 
 		return _data;
@@ -256,7 +258,11 @@ module.exports = React.createClass({
 		return (
 			<FormItem context={this.props.context} {...item} 
 					key={index} 
-					ref={(ref)=>this.state.refs[_name] = ref} 
+					ref={(ref)=>{
+						if(_name) {
+							this.state.refs[_name] = ref;
+						}
+					}} 
 					value={_value_}
 					text={_text_}
 					index={index}

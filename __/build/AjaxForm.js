@@ -226,12 +226,14 @@ module.exports = React.createClass({
     var _refs = this.state.refs,
         _ref = null,
         _data = {},
-        _value = null;
+        _value = null,
+        _key = null;
 
     for (var key in _refs) {
       _ref = _refs[key];
+      _key = _ref.props.valueKey || key;
 
-      if (!_ref) {
+      if (!_ref || !_key || !_ref.props.name) {
         continue;
       }
 
@@ -259,7 +261,7 @@ module.exports = React.createClass({
         continue;
       }
 
-      _data[_ref.props.valueKey || key] = _value;
+      _data[_key] = _value;
     }
 
     return _data;
@@ -320,7 +322,9 @@ module.exports = React.createClass({
     }, item, {
       key: index,
       ref: function ref(_ref3) {
-        return _this.state.refs[_name] = _ref3;
+        if (_name) {
+          _this.state.refs[_name] = _ref3;
+        }
       },
       value: _value_,
       text: _text_,

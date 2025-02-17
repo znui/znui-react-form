@@ -1,15 +1,10 @@
 "use strict";
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 var React = znui.React || require('react');
-
 var FormItem = require('./FormItem');
-
 var loader = require('znui-react-loader');
-
 var popup = require('znui-react-popup');
-
 module.exports = React.createClass({
   displayName: 'ZRFormGroup',
   getInitialState: function getInitialState() {
@@ -19,13 +14,11 @@ module.exports = React.createClass({
   },
   __itemRender: function __itemRender(item, index) {
     var _return = this.props.itemRender && this.props.itemRender(item, index);
-
     if (_return === null) {
       _return = /*#__PURE__*/React.createElement(FormItem, _extends({}, item, {
         key: index
       }));
     }
-
     return _return;
   },
   __onLoading: function __onLoading() {

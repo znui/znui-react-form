@@ -1,11 +1,8 @@
 "use strict";
 
 var React = znui.React || require('react');
-
 var AjaxForm = require('./AjaxForm');
-
 var NativeForm = require('./NativeForm');
-
 module.exports = React.createClass({
   displayName: 'ZRForm',
   render: function render() {

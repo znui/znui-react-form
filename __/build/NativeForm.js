@@ -1,17 +1,11 @@
 "use strict";
 
-function _extends() { _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; }; return _extends.apply(this, arguments); }
-
+function _extends() { return _extends = Object.assign ? Object.assign.bind() : function (n) { for (var e = 1; e < arguments.length; e++) { var t = arguments[e]; for (var r in t) ({}).hasOwnProperty.call(t, r) && (n[r] = t[r]); } return n; }, _extends.apply(null, arguments); }
 var React = znui.React || require('react');
-
 var ReactDOM = znui.ReactDOM || require('react-dom');
-
 var FormItem = require('./FormItem');
-
 var FormGroup = require('./FormGroup');
-
 var FormButtons = require('./FormButtons');
-
 module.exports = React.createClass({
   displayName: 'ZRNativeForm',
   getDefaultProps: function getDefaultProps() {
@@ -36,7 +30,6 @@ module.exports = React.createClass({
   },
   __initValue: function __initValue() {
     var _value = this.props.value;
-
     if (_value) {
       if (_value.__api__) {
         this.__initApiValue(_value);
@@ -47,9 +40,8 @@ module.exports = React.createClass({
   },
   __initApiValue: function __initApiValue(value) {
     var _events = this.props.events || {},
-        _before = _events.before,
-        _after = _events.after;
-
+      _before = _events.before,
+      _after = _events.after;
     this.state.data = zn.data.create(value, zn.extend(_events, {
       before: function (sender, data) {
         this.setState({
@@ -93,7 +85,6 @@ module.exports = React.createClass({
   },
   __onSubmit: function __onSubmit(event) {
     var _return = this.props.onSubmit && this.props.onSubmit(event, this);
-
     if (_return === false) {
       return false;
     }
@@ -123,11 +114,9 @@ module.exports = React.createClass({
   },
   __renderGroups: function __renderGroups() {
     var _groups = this.props.groups || [];
-
     if (!_groups.length) {
       return null;
     }
-
     return /*#__PURE__*/React.createElement("div", {
       className: "groups"
     }, _groups.map(function (group) {
@@ -140,7 +129,6 @@ module.exports = React.createClass({
     if (!this.props.buttons) {
       return null;
     }
-
     return /*#__PURE__*/React.createElement(FormButtons, {
       data: this.props.buttons,
       onSubmit: this.submit,
@@ -150,7 +138,6 @@ module.exports = React.createClass({
   },
   render: function render() {
     var _hiddens = this.props.hiddens || {};
-
     return /*#__PURE__*/React.createElement("form", {
       style: znui.react.style(this.props.style),
       className: znui.react.classname('zr-form zr-native-form', this.props.className),
